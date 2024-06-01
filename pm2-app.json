@@ -1,0 +1,10 @@
+[
+  {
+    "name": "gateway",
+    "script": "/gateway/server.js"
+  },
+  {
+    "name": "authorization",
+    "script": "/authorization/dist/authorization/main.js"
+  }
+]

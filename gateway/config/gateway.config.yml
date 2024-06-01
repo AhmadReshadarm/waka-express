@@ -1,0 +1,50 @@
+http:
+  port: ${PORT}
+
+admin:
+  port: 9876
+  host: '0.0.0.0'
+apiEndpoints:
+  all:
+    host: '*'
+    paths: '*'
+  auth:
+    host: ${HOST}
+    paths: ['/users*', '/auth*', '/admin*']
+  barcode:
+    host: ${HOST}
+    paths: ['/barcode*']
+serviceEndpoints:
+  authSrv:
+    url: ${AUTH_DB}
+  barcodeSrv:
+    url: ${BARCODE_DB}
+policies:
+  - cors
+  - proxy
+  - log
+pipelines:
+  logRequest:
+    apiEndpoints:
+      - all
+    policies:
+      - log:
+          - action:
+              message: '${req.method} ${req.originalUrl}'
+  pipeAuth:
+    apiEndpoints:
+      - auth
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: authSrv
+              changeOrigin: true
+
+  pipeBarcode:
+    apiEndpoints:
+      - barcode
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: barcodeSrv
+              changeOrigin: true
