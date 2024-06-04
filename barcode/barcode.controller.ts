@@ -49,7 +49,8 @@ export class BarcodeController {
         if (barcode.checked) {
           barcode.counter = barcode.counter + 1;
           const checked = await this.barcodeService.updateBarcode(barcode.id, { ...barcode });
-          resp.status(HttpStatus.FORBIDDEN).json(checked);
+          resp.status(HttpStatus.OK).json(checked);
+          // FORBIDDEN
           return;
         }
         barcode.checked = true;
@@ -62,10 +63,10 @@ export class BarcodeController {
         resp.status(HttpStatus.TOO_MANY_REQUESTS).json(barcode);
         return;
       }
-      if (barcode.checked) {
-        resp.status(HttpStatus.FORBIDDEN).json(barcode);
-        return;
-      }
+      // if (barcode.checked) {
+      //   resp.status(HttpStatus.FORBIDDEN).json(barcode);
+      //   return;
+      // }
       barcode.checked = true;
       barcode.counter = barcode.counter + 1;
       const checked = await this.barcodeService.updateBarcode(barcode.id, { ...barcode });
@@ -86,44 +87,117 @@ export class BarcodeController {
       resp.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }
   }
+
+  generateSerialNumber = (length: number) => {
+    let serialNumber = '';
+    for (let i = 0; i < length; i++) {
+      serialNumber = serialNumber + `${Math.floor(Math.random() * 10)}`;
+    }
+    return serialNumber;
+  };
+
   @Post('generate')
-  @Middleware([verifyToken, isAdmin])
+  // @Middleware([verifyToken, isAdmin])
   async generateBarcode(req: Request, resp: Response) {
     try {
-      const generatedBarcodes: Barcodes[] = [];
-      let counter = 0;
-      let oneTime = false;
-      const generatorFunction = async (barcodeLenght: number, startsWith: string) => {
-        if (barcodeLenght >= counter) {
+      // const generatedBarcodes: Barcodes[] = [];
+
+      let productLineCounter = 0;
+      // let generatedAllFiles = false;
+      // let sendHeadersOneTime = false;
+
+      const generatorFunction = async (
+        barcodeLenght: number,
+        startsWith: string,
+        productName: string,
+        iterrationLenght: number,
+        serialNumber: string,
+        productCode: string,
+        counter: number,
+        // generatedAllFiles: boolean,
+      ) => {
+        if (barcodeLenght > counter) {
           const generatedBarcode = generator.generate({
-            length: 9,
+            length: 10,
             numbers: true,
-            // symbols: true,
-            // uppercase: false,
             excludeSimilarCharacters: true,
             strict: true,
           });
+
           const payload = {
-            code: `${startsWith}${generatedBarcode.toUpperCase()}`,
+            code: `${startsWith.toUpperCase()}${generatedBarcode.toUpperCase()}`,
+            productLine: req.body.productlineName,
+            productName: productName,
+            serialNumber,
+            productCode,
             checked: false,
           };
           const barcode = await this.barcodeService.getBarcodeByCode(payload.code);
           if (barcode) {
-            generatorFunction(Number(req.body.barcodeLenght), req.body.startsWith);
+            generatorFunction(
+              barcodeLenght,
+              startsWith,
+              productName,
+              iterrationLenght,
+              serialNumber,
+              productCode,
+              counter,
+              // generatedAllFiles,
+            );
           }
-          const created = await this.barcodeService.createBarcode(payload);
-          generatedBarcodes.push(created);
+          // const created =
+          await this.barcodeService.createBarcode(payload);
+          // generatedBarcodes.push(created);
           counter = counter + 1;
-          generatorFunction(Number(req.body.barcodeLenght), req.body.startsWith);
+          generatorFunction(
+            barcodeLenght,
+            startsWith,
+            productName,
+            iterrationLenght,
+            serialNumber,
+            productCode,
+            counter,
+            // generatedAllFiles,
+          );
+          // if (iterrationLenght <= productLineCounter && barcodeLenght <= counter) {
+          //   generatedAllFiles = true;
+          // }
         }
-        if (barcodeLenght <= counter && !oneTime) {
-          oneTime = true;
-          resp.status(HttpStatus.CREATED).json(generatedBarcodes);
+
+        // if (generatedAllFiles && !sendHeadersOneTime) {
+        //   sendHeadersOneTime = true;
+        //   resp.status(HttpStatus.CREATED).json('success');
+        // }
+      };
+
+      const ProductLineIterration = async (iterrationLenght: number, startsWith: string, productName: string) => {
+        const serialNumber = this.generateSerialNumber(13);
+        const productCode = this.generateSerialNumber(12);
+        let counter = 0;
+
+        if (iterrationLenght >= productLineCounter) {
+          await generatorFunction(
+            Number(req.body.barcodeLenght),
+            startsWith,
+            productName,
+            iterrationLenght,
+            serialNumber,
+            productCode,
+            counter,
+            // generatedAllFiles,
+          );
+          productLineCounter = productLineCounter + 1;
+          await ProductLineIterration(iterrationLenght, startsWith, req.body.productLine[productLineCounter].name);
         }
       };
-      // ------------------
-      generatorFunction(Number(req.body.barcodeLenght), req.body.startsWith);
-      // resp.status(HttpStatus.CREATED).json(generatedBarcodes);
+
+      resp.status(HttpStatus.OK).json('success');
+
+      await ProductLineIterration(
+        Number(req.body.productLine.length - 1),
+        req.body.startsWith,
+        req.body.productLine[productLineCounter].name,
+      );
     } catch (error: any) {
       resp.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }

@@ -14,7 +14,7 @@ export class BarcodeService {
   }
 
   async getAllBarcode(queryParams: BarcodeQueryDTO): Promise<PaginationDTO<barcodeDTO | Barcodes[]>> {
-    const { code, checked, sortBy = 'createdAt', orderBy = 'DESC', offset = 0, limit = 1000 } = queryParams;
+    const { code, checked, sortBy = 'productName', orderBy = 'DESC', offset = 0, limit = 1000 } = queryParams;
     //
     const queryBuilder = this.barcodeRepository.createQueryBuilder('barcode');
     if (code) {

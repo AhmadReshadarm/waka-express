@@ -10,6 +10,18 @@ export class Barcodes {
   @Column({ unique: true })
   code: string;
 
+  @Column()
+  productName: string;
+
+  @Column()
+  productLine: string;
+
+  @Column()
+  serialNumber: string;
+
+  @Column()
+  productCode: string;
+
   @Column({ default: false })
   checked: boolean;
 
@@ -22,10 +34,21 @@ export class Barcodes {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  constructor(args?: { code: string; checked: boolean }) {
+  constructor(args?: {
+    code: string;
+    checked: boolean;
+    productName: string;
+    productLine: string;
+    serialNumber: string;
+    productCode: string;
+  }) {
     if (args) {
       this.code = args.code;
       this.checked = args.checked;
+      this.productName = args.productName;
+      this.productLine = args.productLine;
+      this.serialNumber = args.serialNumber;
+      this.productCode = args.productCode;
     }
   }
 }
