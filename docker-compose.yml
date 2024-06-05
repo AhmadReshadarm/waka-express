@@ -4,7 +4,7 @@ services:
   db:
     image: mysql
     command: mysqld --default-authentication-plugin=mysql_native_password
-    restart: never
+    restart: on-failure
     expose:
       - '3306'
     ports:
