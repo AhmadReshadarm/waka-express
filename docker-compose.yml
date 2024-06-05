@@ -54,6 +54,18 @@ services:
       - mynet
     depends_on:
       - mariadb
+  nginx:
+    image: nginx:1.17.4-alpine
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - phpmyadmin_data:/var/www/html/:ro
+    ports:
+      - '90:80'
+    networks:
+      - mynet
+    depends_on:
+      - mariadb
+      - phpmyadmin
 # authorization:
 #   build:
 #     context: .
