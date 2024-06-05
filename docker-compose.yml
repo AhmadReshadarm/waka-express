@@ -2,8 +2,8 @@
 
 services:
   db:
-    image: mysql
-    command: mysqld --default-authentication-plugin=mysql_native_password
+    image: mysql:latest
+    command: mysqld --authentication_policy=* #--default-authentication-plugin=mysql_native_password
     restart: always
     expose:
       - '3306'
