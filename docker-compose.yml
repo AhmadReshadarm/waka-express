@@ -11,6 +11,7 @@ services:
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: root
     volumes:
       - '/var/lib/mysql-data:/var/lib/mysql'
   phpmyadmin:
