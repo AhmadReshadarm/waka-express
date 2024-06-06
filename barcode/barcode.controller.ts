@@ -169,7 +169,6 @@ export class BarcodeController {
             serialNumber,
             productCode,
             counter,
-            // generatedAllFiles,
           );
           productLineCounter = productLineCounter + 1;
           await ProductLineIterration(iterrationLenght, startsWith, req.body.productLine[productLineCounter].name);
@@ -184,7 +183,9 @@ export class BarcodeController {
         req.body.productLine[productLineCounter].name,
       );
     } catch (error: any) {
-      resp.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      console.log(error);
+
+      // resp.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }
   }
 
