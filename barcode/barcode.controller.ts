@@ -97,14 +97,10 @@ export class BarcodeController {
   };
 
   @Post('generate')
-  // @Middleware([verifyToken, isAdmin])
+  @Middleware([verifyToken, isAdmin])
   async generateBarcode(req: Request, resp: Response) {
     try {
-      // const generatedBarcodes: Barcodes[] = [];
-
       let productLineCounter = 0;
-      // let generatedAllFiles = false;
-      // let sendHeadersOneTime = false;
 
       const generatorFunction = async (
         barcodeLenght: number,
@@ -114,7 +110,6 @@ export class BarcodeController {
         serialNumber: string,
         productCode: string,
         counter: number,
-        // generatedAllFiles: boolean,
       ) => {
         if (barcodeLenght > counter) {
           const generatedBarcode = generator.generate({
@@ -142,12 +137,11 @@ export class BarcodeController {
               serialNumber,
               productCode,
               counter,
-              // generatedAllFiles,
             );
           }
-          // const created =
+
           await this.barcodeService.createBarcode(payload);
-          // generatedBarcodes.push(created);
+
           counter = counter + 1;
           generatorFunction(
             barcodeLenght,
@@ -157,17 +151,8 @@ export class BarcodeController {
             serialNumber,
             productCode,
             counter,
-            // generatedAllFiles,
           );
-          // if (iterrationLenght <= productLineCounter && barcodeLenght <= counter) {
-          //   generatedAllFiles = true;
-          // }
         }
-
-        // if (generatedAllFiles && !sendHeadersOneTime) {
-        //   sendHeadersOneTime = true;
-        //   resp.status(HttpStatus.CREATED).json('success');
-        // }
       };
 
       const ProductLineIterration = async (iterrationLenght: number, startsWith: string, productName: string) => {
