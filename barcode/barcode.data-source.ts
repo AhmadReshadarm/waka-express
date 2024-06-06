@@ -12,6 +12,7 @@ const dataSource = new DataSource({
   synchronize: true,
   migrationsRun: false,
   entities: [Barcodes],
+  charset: 'utf8mb4',
 });
 
 export default dataSource;
